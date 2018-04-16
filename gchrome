@@ -1,0 +1,231 @@
+#!/bin/sh
+
+######################################################################
+#                                                                    #
+# Copyright (C) 2018 by Sabin Katila (sabin@sabink.org)              #
+# Released under the terms of GPLv3 <http://www.gnu.org/licenses/>   #
+# You are free to use it, modify it or                               #
+# redistribute it under the terms of GPLv3                           #
+#                                                                    #
+######################################################################
+#
+# TODO: echo or printf?
+# TODO: add flag to pass chrome specific switches. E.g --chrome="blah blah"
+# TODO: add flag to chose location of disk cache. Only tor profile
+#       uses /dev/shm for disk cache for now
+#
+# kdialog and chrome do not play well together
+# Issue 1 (solved in version 43.0.2357.132)
+#	When saving, filename is not highlighted
+# Issue 2 (pending - said to be solved with kde 4.9 but still comes up
+#	mime type application/x-webarchive (Webpage complete)
+#	is not shown in saveas dialog
+# 	Running kdialog --getsavefilename $HOME "text/html application/x-webarchive"
+#	shows both webpage and webpage complete but not with chrome
+# Temporary solution is now to avoid kdialog and use gtk dialog
+#
+# From: chrome://net-internals#proxy
+#
+# Some traffic such as DNS prefetching will NOT go through the proxy server. 
+# To prevent the browser from doing local DNS resolves 
+# try adding this command line flag:
+#
+# --host-resolver-rules="MAP * ~NOTFOUND , EXCLUDE localhost"
+#
+# Setting these local variable changes the game
+# SOCKS_VERSION=5
+# SOCKS_SERVER="localhost:9050"
+#
+###############################################################################
+
+
+STIME="$(date)"
+export NO_CHROME_KDE_FILE_DIALOG=1
+export CHROME_DIR=${HOME}/chrome
+export TOR_DIR="torbrowse|tor1|tor2"	# Dirs which you might want for tor
+export SECURE="shera"	# Dirs you might want for email or work etc.
+export TOR_PROXY_SERVER="\"socks5://127.0.0.1:9050\"" # --disk-cache-dir=/dev/shm/${PROF_NAME}
+export DISK_CACHE_DIR="/dev/shm"	# Speed up browsing by throwing everything in RAM
+export PROG_NAME="$0"
+
+
+# This portion is personal preference
+# I don't like when traffic gets redirected due to variables
+# set hours ago
+if [ ! -z ${SOCKS_VERSION+x} ]; then
+	echo "\$SOCKS_VERSION has been set to" "${SOCKS_VERSION}"
+	echo "IGNORING!!!"
+	unset SOCKS_VERSION
+fi
+
+if [ ! -z ${SOCKS_SERVER+x} ]; then
+	echo "\$SOCKS_SERVER has been set to" "${SOCKS_SERVER}"
+	echo "IGNORING!!!"
+	unset SOCKS_SERVER
+fi
+
+#
+# --password-store can be either basic or gnome or kde
+# prefer basic since migrating passwords around is as simple as
+# moving the $CHROME_DIR to another computer.
+# NOT SAFE !!!!!!!
+# However, if you have google account sync on, then using gnome
+# keyring means shit. Even if you don't unlock the keyring, once
+# chrome starts, passwords will be automatically populated by
+# google. So, someone gets access to your system, you are fucked.
+# Moral of the story, if you want to stay safe, don't sync password
+# with google
+#
+
+export PASSWORD_STORE=basic
+
+if [ $# -lt 1 ]; then
+	echo "In sufficient arguments" >&2
+	printf "\\nTry $0 -h for help\\n" >&2
+	echo "Possible arguments are:"
+	echo ""
+	args=$(find "$CHROME_DIR"/* -maxdepth 0 -type d  | awk -F'/' '{print $NF}' | paste -s -d ' ')
+	printf "\\t%s\\n" "$args" >&2
+	exit 1
+fi
+
+usage()
+{
+	echo "Usage: $PROG_NAME -tacp <dirname> [args]"
+	echo "      -t --tor Use tor"
+	echo "      -a  --alt <directory> # alternate location of chrome user"
+	echo "      -c --create <directory> if you want chrome to create new user"
+	echo "	              directory under $CHROME_DIR"
+	echo "      <dirname> profile directory"
+	echo "      optional chrome arguments, no recommended"
+	echo " "
+	echo "      --alt and --create cannot be used together"
+	echo ""
+	echo ""
+	echo "	profile directories are stored in ${HOME}/chrome"
+	echo "	You will have to manually create ~/chrome directory"
+	echo "	and a few profile directories. Just a mkdir <name> will do"
+}
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+	usage 1>&2
+	exit 0
+fi
+
+SET_TOR=1	# Start with tor
+ALT_DIR=1	# Alternate mother dir
+C_DIR=1	# Create new dir?
+SET_PASS=1	# If user wants to change password method
+
+pname=""	# profile directory name
+
+OPTS=$(getopt -o ta:c:p: --long tor,alt:,create:,password: -n 'gchrome' -- "$@")
+eval set -- "$OPTS"
+while true;do 
+	case "$1" in
+		-t | --tor)
+			SET_TOR=0
+			shift
+		;;
+		-a | --alt)
+			ALT_DIR=0
+			pname=$2
+			shift 2
+		;;
+		-c | --create)			C_DIR=0;			pname=$2;			shift 2	;;
+		-p | --password)
+			SET_PASS=0
+			pass=$2	#gnome|kwallet|basic
+			shift 2
+		;;
+		--)	shift ; break;;
+		*)	pname=$1;shift;break;;
+	esac
+done
+shift $((OPTIND-1))
+# This conditional happens when neither -a nor -c is used
+if [ -z "$pname" ]; then
+	pname=$1
+	shift
+fi
+
+if [ $ALT_DIR -eq 0 ] &&  [ $C_DIR -eq 0 ]; then
+	printf " -a and -c are mutually exclusive. Use only one!!!\\n" >&2
+	exit 1
+fi
+
+echo "pname is:  $pname"
+echo "$@"
+if [ ${SET_PASS} -eq 0 ]; then
+	PASSWORD_STORE=$pass
+	echo "${PASSWORD_STORE}" | grep -E -w "gnome|kwallet|basic" > /dev/null
+	if [ $? -ne 0 ]; then
+		echo "The password storage method, ${PASSWORD_STORE} you specified is not valid" 1>&2
+	fi
+else
+	echo "${pname}" | grep -E -w ${SECURE}	# secure profiles
+	if [ $? -eq 0 ]; then PASSWORD_STORE="gnome"; fi	
+	# else we go with default PASSWORD_STORE
+fi
+
+if [ ${ALT_DIR} -eq 0 ]; then
+	echo "You have decided to use an alternate data directory"
+	echo "I am not responsible for what is going to happen"
+	USR_DIR=$pname
+	pname=$(basename $ALT_DIR /)	# Useful for /dev/shm/$pname
+else
+	USR_DIR=${CHROME_DIR}/${pname}
+fi
+
+if [ ${C_DIR} -eq 0 ]; then
+	# We create the specified profile directory and proceed
+	echo "You are asking me to create new user profile directory: " "$2" 1>&2
+	echo "Creating!!!"
+	mkdir -v "${USR_DIR}" || { echo "Failed to create $2, EXITING WITH ERROR"  &&	exit 1; }
+	echo "Next step"
+
+elif [ ${ALT_DIR} -eq 1 ];then
+	# We are using regular ${CHROME_DIR}/$pname
+	# Let's make sure $pname is present in $CHROME_DIR
+	echo "CHECKING DIR EXISTING"
+	if [ ! -d "$CHROME_DIR/$pname" ]; then
+		args=$(find "${CHROME_DIR}"/* -maxdepth 0 -type d  |\
+			awk -F'/' '{print $NF}' |\
+			paste -s -d ' ')
+		echo "google-chrome profile $pname doesn't exist in $CHROME_DIR" >&2
+		echo "Available profiles are: $args" >&2
+		exit 1
+	fi
+elif [ ${ALT_DIR} -eq 0 ]; then
+	# Only if we are using ALT_DIR
+	echo "Verifying alternate chrome directory " $USR_DIR
+	if [ ! -d ${USR_DIR} ]; then
+		echo "${USR_DIR} does not exist" 1>&2
+		echo "Check for typo or alternatively, manually create an empty directory" 1>&2
+		exit 1
+	fi
+else
+	# Do shit
+	echo ""
+fi
+echo "Now checking tor"
+# Checking whether it is a tor case
+echo "${pname}" | grep -E -w ${TOR_DIR}
+if [ $? -eq 0 ] && [ ${SET_TOR} -eq 1 ]; then
+	echo "It seems you are attempting to use a tor enabled profile without"
+	echo "enabling the -t (--tor) option" 
+	echo "try again with -t"
+	exit 1
+fi
+
+if [ ${SET_TOR} -eq 0 ]; then
+	DISK_CACHE_DIR="/dev/shm/"${pname}
+	echo "Start Tor Browse : $STIME"
+	google-chrome --password-store="${PASSWORD_STORE}" --user-data-dir="${USR_DIR}" --proxy-server="${TOR_PROXY_SERVER}" --disk-cache-dir="${DISK_CACHE_DIR}" $@
+	echo "End: $(date)"
+else
+	echo "Start: $STIME"
+	google-chrome --password-store="${PASSWORD_STORE}" --user-data-dir="${USR_DIR}" $@
+	echo "End: " "$(date)"
+fi
+
