@@ -1,0 +1,19 @@
+# top-most EditorConfig file
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+
+# Matches multiple files with brace expansion notation
+# Set default charset
+[*.{py}]
+charset = utf-8
+
+# Tab indentation for python file
+[*.py]
+indent_style = tab
+
+# Tabe indentation for shell scripts
+[*.sh]
+indent_style = tab
