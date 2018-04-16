@@ -42,8 +42,27 @@ Basically, instead of having to type
 	google-chrome --user-data-dir=$HOME/chrome/<profile> --password-manager=basic (or whatever you are using)
 gchrome makes your life easier.
 	
+	Usage: ./gchrome -tacp <dirname> [args]
+      	-t --tor Use tor
+      	-a  --alt <directory> # alternate location of chrome user
+      	-c --create <directory> if you want chrome to create new user
+                      directory under /home/dchaos/chrome
+      	<dirname> profile directory
+      	[args] optional chrome arguments, no recommended
+ 
+      	--alt and --create cannot be used together
+
+        profile directories are stored in /home/dchaos/chrome
+        You will have to manually create ~/chrome directory
+        and a few profile directories. Just a mkdir <name> will do`
+	
+
+---
 ## pretty-html.py
 
 bs4 pretty-printer. Everyonce in a while I end up having to reformat html for one reason or another. This is my quick and dirty solution. tidy can do a better job I suppose but I like my pretty printer!!!
 
 `python pretty-html -i input.html <output>` # output can be a file or be left empty (or -) for stdout.
+
+Alternatively,
+	`cat file.html | python pretty-html.py > outfile`
