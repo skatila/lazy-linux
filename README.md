@@ -6,7 +6,7 @@ Even doing a `history | grep something` gets repetitive.
 So, over course of time like all linux user I have ended up writing up small and large scripts/programs to automate routine tasks.
 
   - [gchrome](#gchrome)
-  - [pretty-html.py](#pretty-html.py)
+  - [pretty-html.py](#pretty-html)
 	
 
 ---
@@ -58,7 +58,7 @@ gchrome makes your life easier.
 	
 
 ---
-## pretty-html.py
+## pretty-html
 
 bs4 pretty-printer. Everyonce in a while I end up having to reformat html for one reason or another. This is my quick and dirty solution. tidy can do a better job I suppose but I like my pretty printer!!!
 
