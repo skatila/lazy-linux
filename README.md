@@ -3,10 +3,11 @@ Amalgam of tools to make a *nix user live easy
 
 Why type a long line of command every time you want to get something done?
 Even doing a `history | grep something` gets repetitive.
-So, over course of time like all linux user I have ended up writing up small and large scripts/programs to automate routine tasks.
+So, over course of time like all linux user I have ended up writing a number of small and large scripts/programs to automate routine tasks.
 
   - [gchrome](#gchrome)
   - [pretty-html.py](#pretty-html)
+  - [left-mouse-right-trackpad-mapper](#left-mouse-right-trackpad-mapper)
 	
 
 ---
@@ -28,3 +29,12 @@ bs4 pretty-printer. Everyonce in a while I end up having to reformat html for on
 
 Alternatively,
 	`cat file.html | python pretty-html.py > outfile`
+
+---
+## left-mouse-right-trackpad-mapper
+
+left-mouse-right-trackpad-mapper is what it is. Sets up my dell mouse for left handed use and my logitech keyboard trackpad for right hand. Normal gui configuration method do not allow per device setup. If you want to use this, you will have to modify the script yourself:
+
+	DEV_LOGI	# which is created by grepping xinput\'s output for Logitech
+	DEV_DELL	# which is created by grepping xinput\'s output for Dell
+After that, either stick it in to your startup (fluxbox strartup or xinitrc) or call it manually `sh left-mouse-right-trackpad-mapper.sh`
