@@ -96,6 +96,7 @@ usage()
 	echo "      -a  --alt <directory> # alternate location of chrome user"
 	echo "      -c --create <directory> if you want chrome to create new user"
 	echo "	              directory under $CHROME_DIR"
+	echo "      -p  basic OR gnome OR kwallet, defaults to basic"
 	echo "      <dirname> profile directory"
 	echo "      optional chrome arguments, no recommended"
 	echo " "
