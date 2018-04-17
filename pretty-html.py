@@ -3,7 +3,7 @@
 ###############################################################################
 # Copyright (C) 2018 by Sabin Katila (sabin@sabink.org)                       #
 # Released under the terms of GPLv3                                           #
-# <http://www.gnu.org/licenses/												  #
+# <http://www.gnu.org/licenses/                                               #
 # You are free to use, modify and/or redistribute as per the terms of GPL v3  #
 #                                                                             #
 ###############################################################################
@@ -28,12 +28,12 @@ def outw(ofile, force=False):
 	else:
 		# only when outfile exists
 		if os.path.isfile(ofile) and force:
-			sys.stderr.write("output file " + ofile + \
+			sys.stderr.write("output file " + ofile +
 				" already exists, overwritting!!!\n")
 		else:
 			error_m = "exists"
 			if os.path.isdir(ofile): error_m = "is a directory"
-			sys.stderr.write("Outfile " + error_m +	\
+			sys.stderr.write("Outfile " + error_m +
 				"!!! Cowardly quitting!!!\n")
 			sys.exit(1)
 	#print("OKAY we are writing output to: ", ofile)
