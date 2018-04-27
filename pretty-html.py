@@ -11,6 +11,7 @@ from __future__ import print_function
 
 import sys, os
 import argparse
+import select
 from contextlib import contextmanager
 
 from bs4 import BeautifulSoup
@@ -86,6 +87,14 @@ def main():
 	# now that infile and outfile checks are done, let's get started
 
 	if infile == '-':
+		if not select.select([sys.stdin, ], [], [], 0.0)[0]:
+			# If stdin has nothing, abort
+			sys.stderr.write(
+			"No options given\n" +
+			"Either pass data via stdin or try pretty-html.py -h\n"
+			)
+			#parser.print_help()
+			parser.exit(1)
 		inf = [i for i in sys.stdin]
 	else:
 		inf = [i for i in open(infile, "r")]
