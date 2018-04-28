@@ -29,20 +29,25 @@ def outw(ofile, force=False):
 	else:
 		# only when outfile exists
 		if os.path.isfile(ofile) and force:
-			sys.stderr.write("output file " + ofile +
-				" already exists, overwritting!!!\n")
+			sys.stderr.write(
+				"output file " + ofile +
+				" already exists, overwritting!!!\n"
+			)
 		else:
 			error_m = "exists"
 			if os.path.isdir(ofile): error_m = "is a directory"
-			sys.stderr.write("Outfile " + error_m +
-				"!!! Cowardly quitting!!!\n")
+			sys.stderr.write(
+				"Outfile " + error_m +
+				"!!! Cowardly quitting!!!\n"
+			)
 			sys.exit(1)
-	#print("OKAY we are writing output to: ", ofile)
+	# print("OKAY we are writing output to: ", ofile)
 	try:
 		outf = open(ofile, "wb")
 		yield outf
 	finally:
 		outf.close()
+
 
 def main():
 	"""
@@ -51,38 +56,37 @@ def main():
 	parser = argparse.ArgumentParser()
 
 	parser.add_argument(
-			"-i", "--input-file",
-			dest="input",
-			help="Input file",
-			required=False,
-			default='-'
-			)
+		"-i", "--input-file",
+		dest="input",
+		help="Input file",
+		required=False,
+		default='-'
+	)
 
 	parser.add_argument(
-			"output",
-			help="Output file, use - or just skip for stdout",
-			nargs='?',
-			default="-"
-			)
+		"output",
+		help="Output file, use - or just skip for stdout",
+		nargs='?',
+		default="-"
+	)
 
 	parser.add_argument(
-			"-f", "--force",
-			action="store_true",
-			default=False,
-			help="Output file, if present will be overwritten"
-			)
+		"-f", "--force",
+		action="store_true",
+		default=False,
+		help="Output file, if present will be overwritten"
+	)
 
 	args = parser.parse_args()
 
 	infile = args.input
 	outfile = args.output
-	#print("%s \n %s" % (infile, outfile))
+	# print("%s \n %s" % (infile, outfile))
 	if infile != '-' and not os.path.isfile(infile):
 		msg = "does not exist"
 		if os.path.isdir(infile): msg = "is a directory"
-		sys.stderr.write("Input file " +  msg +  " Check again!!!\n")
+		sys.stderr.write("Input file " + msg + " Check again!!!\n")
 		sys.exit(1)
-
 
 	# now that infile and outfile checks are done, let's get started
 
@@ -90,10 +94,10 @@ def main():
 		if not select.select([sys.stdin, ], [], [], 0.0)[0]:
 			# If stdin has nothing, abort
 			sys.stderr.write(
-			"No options given\n" +
-			"Either pass data via stdin or try pretty-html.py -h\n"
+				"No options given\n" +
+				"Either pass data via stdin or try pretty-html.py -h\n"
 			)
-			#parser.print_help()
+			# parser.print_help()
 			parser.exit(1)
 		inf = [i for i in sys.stdin]
 	else:
@@ -106,6 +110,7 @@ def main():
 	else:
 		with outw(outfile, force=args.force) as o:
 			o.write(pr.encode('utf-8'))
+
 
 if __name__ == '__main__':
 	main()
