@@ -44,7 +44,7 @@ export NO_CHROME_KDE_FILE_DIALOG=1
 export CHROME_DIR=${HOME}/chrome
 export TOR_DIR="torbrowse|tor1|tor2"	# Dirs which you might want for tor
 export SECURE="shera"	# Dirs you might want for email or work etc.
-export TOR_PROXY_SERVER="\"socks5://127.0.0.1:9050\"" # --disk-cache-dir=/dev/shm/${PROF_NAME}
+export TOR_PROXY_SERVER="socks5://127.0.0.1:9050" # --disk-cache-dir=/dev/shm/${PROF_NAME}
 export DISK_CACHE_DIR="/dev/shm"	# Speed up browsing by throwing everything in RAM
 export PROG_NAME="$0"
 
