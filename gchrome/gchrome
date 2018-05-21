@@ -146,8 +146,20 @@ done
 shift $((OPTIND-1))
 # This conditional happens when neither -a nor -c is used
 if [ -z "$pname" ]; then
-	pname=$1
-	shift
+	if [ $# -gt 0 ]; then
+		pname=$1
+		shift
+	else
+		echo "Not enough arguments"
+		exit 1
+	fi
+fi
+# check for valid profile name
+echo $pname | grep -q ^-
+if [ $? -eq 0 ]; then
+	echo "The profile name you specified is not valid" 2>&1
+	echo "For now, mixing arguments is not a good idea" 2>&1
+	exit 1
 fi
 
 if [ $ALT_DIR -eq 0 ] &&  [ $C_DIR -eq 0 ]; then
