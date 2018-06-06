@@ -235,10 +235,14 @@ if [ ${SET_TOR} -eq 0 ]; then
 	DISK_CACHE_DIR="/dev/shm/"${pname}
 	echo "Start Tor Browse : $STIME"
 	google-chrome --password-store="${PASSWORD_STORE}" --user-data-dir="${USR_DIR}" --proxy-server="${TOR_PROXY_SERVER}" --disk-cache-dir="${DISK_CACHE_DIR}" $@
+	exit_s=$?
 	echo "End: $(date)"
+	exit ${exit_s}
 else
 	echo "Start: $STIME"
 	google-chrome --password-store="${PASSWORD_STORE}" --user-data-dir="${USR_DIR}" $@
+	exit_s=$?
 	echo "End: " "$(date)"
+	exit ${exit_s}
 fi
 
