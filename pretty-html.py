@@ -115,4 +115,4 @@ def main():
 if __name__ == '__main__':
 	main()
 
-# vim: autoindent tabstop=4 shiftwidth=4 noexpandtab softtabstop=4 filetype=python
+# vim: filetype=python autoindent tabstop=4 shiftwidth=4 noexpandtab softtabstop=4
