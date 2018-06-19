@@ -1,0 +1,39 @@
+#!/bin/sh
+#
+# fluxbox startup-script:
+#
+# Lines starting with a '#' are ignored.
+
+# Change your keymap:
+#xmodmap ~/.Xmodmap
+synclient TapButton1=1
+source ~/.profile
+# Applications you want to run with fluxbox.
+# MAKE SURE THAT APPS THAT KEEP RUNNING HAVE AN ''&'' AT THE END.
+#
+# unclutter -idle 2 &
+# wmnd &
+# wmsmixer -w &
+# idesk &
+#
+# Debian-local change:
+#   - fbautostart has been added with a quick hack to check to see if it
+#     exists. If it does, we'll start it up by default.
+which fbautostart > /dev/null
+if [ $? -eq 0 ]; then
+    fbautostart
+fi
+
+# And last but not least we start fluxbox.
+# Because it is the last app you have to run it with ''exec'' before it.
+gnome-flashback &
+/usr/bin/gnome-keyring-daemon --start &
+sleep 3;
+(sleep 10;fbsetbg -c /home/USER/Pictures/received_10205951394969318.jpeg) &
+sh ~/.fluxbox/trackpad &
+# Should I do kded4& or run kdeinit4 --suicide
+#kded4 &
+kdeinit4 --suicide &	# kdeinit4 --suicide did not cause hangup on right click
+#exec fluxbox
+# or if you want to keep a log:
+exec fluxbox -verbose -log "/home/USER/.fluxbox/log"

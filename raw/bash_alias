@@ -1,0 +1,3 @@
+alias pvim="vim -u ~/.pvim/pvimrc"
+alias pvimx="vimx -u ~/.pvim/pvimrc"
+#alias sft=setfont /lib/kbd/consolefonts/ter-218b.psf.gz

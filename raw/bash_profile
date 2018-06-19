@@ -1,0 +1,38 @@
+# /etc/profile: system-wide .profile file for the Bourne shell (sh(1))
+# and Bourne compatible shells (bash(1), ksh(1), ash(1), ...).
+echo "SOURCING .bash_profile!!!"
+STIME=$(date +%H-%M-%S)
+#echo $PATH | tr ':' '\n' | sort  | cat -n >> /tmp/${STIME}-start-h-profile
+#export GOROOT=/opt/sfw/golang/go
+
+#PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games"
+
+export OPATH=$PATH
+
+export GOPATH=$HOME/.local/gopath
+
+PATH="${HOME}/.local/bin:${HOME}/.cabal/bin:$GOPATH/bin:${HOME}/.cargo/bin:$PATH"
+
+#echo $PATH | tr ':' '\n' | sort  | cat -n > /tmp/${STIME}-start-h-profile-aft-add
+export MPATH=$PATH
+if [ "${BASH-}" ] && [ "$BASH" != "/bin/sh" ]; then
+    # The file bash.bashrc already sets the default PS1.
+    # PS1='\h:\w\$ '
+	if [ -f /etc/bash.bashrc ]; then
+      source /etc/bash.bashrc
+	fi
+fi
+#echo $PATH | tr ':' '\n' | sort  | cat -n > /tmp/${STIME}-start-h-profile-aft-etc-bashrc
+# This part is done inside /etc/bashrc (or bash.bashrc)
+if [ -d /etc/profile.d ]; then
+  for i in /etc/profile.d/*.sh; do
+    if [ -r $i ]; then
+      . $i
+    fi
+  done
+  unset i
+#echo $PATH | tr ':' '\n' | sort  | cat -n > /tmp/${STIME}-start-h-profile-aft-profiled
+fi
+
+
+#echo $PATH | tr ':' '\n' | sort  | cat -n > /tmp/${STIME}-end-h-profile

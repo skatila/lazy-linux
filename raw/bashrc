@@ -1,0 +1,166 @@
+# If not running interactively, don't do anything
+echo "SOURCING BASHRC"
+export UNCRUSTIFY_CONFIG="/usr/share/doc/uncrustify/documentation/htdocs/linux.cfg.txt"
+STIME=$(date +%H-%M-%S)
+#echo $PATH | tr ':' '\n' | sort  | cat -n > /tmp/${STIME}-start-h-bashrc
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
+# Fedora sucks when sourcing stuff to .profile
+. /etc/bashrc
+
+export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+export RUST_SRC_PATH="$(~/.cargo/bin/rustc --print sysroot)/lib/rustlib/src/rust/src"
+# ignore lines starting with space or duplicate lines
+HISTCONTROL=ignoreboth
+# append to histfile
+shopt -s histappend
+# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
+HISTSIZE=5000
+HISTFILESIZE=5000
+
+export OLDPATH=$PATH
+#export GOPATH=$HOME/.local/gopath
+#PATH=${HOME}/.local/bin:${HOME}/.cabal/bin:$GOPATH/bin:$PATH
+
+
+# check the window size after each command and, if necessary,
+# update the values of LINES and COLUMNS.
+shopt -s checkwinsize
+
+# If set, the pattern "**" used in a pathname expansion context will
+# match all files and zero or more directories and subdirectories.
+#shopt -s globstar
+
+# make less more friendly for non-text input files, see lesspipe(1)
+#[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
+
+
+#######################################################
+# check if in tmux and set TERM to screen-256color
+if [ -z ${TMUX+x} ];then
+	echo "Not in tmux, default TERM"
+else
+	echo ".bashrc in tmux setting TERM=screen-256color!!!!"
+	export TM=1
+	export TERM="screen-256color"
+fi
+#######################################################
+
+# set a fancy prompt (non-color, unless we know we "want" color)
+case "$TERM" in
+    xterm-color) color_prompt=yes;;
+esac
+
+force_color_prompt=yes
+
+if [ -n "$force_color_prompt" ]; then
+    if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
+	# We have color support; assume it's compliant with Ecma-48
+	# (ISO/IEC-6429). (Lack of such support is extremely rare, and such
+	# a case would tend to support setf rather than setaf.)
+	color_prompt=yes
+    else
+	color_prompt=
+    fi
+fi
+if [ "$color_prompt" = yes ]; then
+    PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+else
+    PS1='\u@\h:\w\$ '
+fi
+unset color_prompt force_color_prompt
+
+# If this is an xterm set the title to user@host:dir
+case "$TERM" in
+xterm*|rxvt*)
+    PS1="\[\e]0;\u@\h: \w\a\]$PS1"
+    ;;
+*)
+    ;;
+esac
+
+# enable color support of ls and also add handy aliases
+if [ -x /usr/bin/dircolors ]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    alias ls='ls --color=auto'
+fi
+
+if [ -f ~/.bash_aliases ]; then
+    . ~/.bash_aliases
+fi
+
+if [ ! -z "$VIRTUAL_ENV" ]; then
+	echo " virtenv is set"
+	echo $VIRTUAL_ENV
+	. "${VIRTUAL_ENV}/bin/activate"
+	. "${VIRTUAL_ENV}/bin/postactivate"
+	#export VIRTUAL_ENV
+	#export VIRTUALENV_WRAPPER_SCRIPT
+fi
+
+function runpython2 {
+	# We could use $OLDPATH in order to make this function idiot
+	# proof. Without that, if someone were to run it multiple times
+	# in the same shell, $PATH would get bloated with multiple entries
+	# We could do the same with $PS1 - the bloat is more visible
+	# However, the function below is cleaner and actually gives a warning
+	# And, it preserves any user addition to $PATH prior to calling
+	# runpython2/3
+	if [ ${RP2-10} -eq 1 ]; then
+		echo "Already in runpython2" 1>&2
+		return 1
+	fi
+	echo "runpython2" 1>&2
+	export PATH=${HOME}/.local/anaconda2/bin:${PATH}
+#	source ${HOME}/.local/anaconda2/bin/virtualenvwrapper_lazy.sh
+	export PS1="_python2"-$PS1
+	export RP2=1
+	export RP3=0
+	echo "runpython2" >> /tmp/rp
+}
+
+function runpython3 {
+	if [ ${RP3-10} -eq 1 ]; then
+		echo "Already in runpython3" 1>&2
+		return 1
+	fi
+	echo "runpython3" >> /tmp/rp
+	echo "runpython3" 1>&2
+	export PATH=${HOME}/.local/anaconda3/bin:${PATH}
+#	source ${HOME}/.local/anaconda3/bin/virtualenvwrapper_lazy.sh
+	export PS1="_python3"-$PS1
+	export RP2=0
+	export RP3=1
+}
+
+# for tmux
+echo ${TMUX}
+if [ ! -z ${TMUX+x} ];then
+	echo "Inside tmux check for further RP"
+	if [ ${RP2-10} -eq 1 ]; then
+		export TRP2=1
+		export RP2=0
+		# No need to rerun runpython2
+		# tmux inherits $PATH from parent shell as long as default-command /bin/bash
+		# is used in conf file
+		# Just set the PS1 properly
+		# It used to be the case until Mon April 09, 2018
+		# Now, first shell inherits parent $PATH but subsequnt do not
+		# So, we need to do runpython2/3
+		runpython2
+		#export PS1="_python2"-$PS1
+	
+	elif [ ${RP3-10} -eq 1 ]; then
+		export TRP3=1
+		export RP3=0
+		runpython3
+		#export PS1='_python3'-$PS1
+	else
+		echo "passing runpython checks!!!"#-n	# Is there a pass statement in bash?
+	fi
+fi
+#echo $PATH
+#echo $PATH | tr ':' '\n' | sort  | cat -n > /tmp/${STIME}-end-h-bashrc
