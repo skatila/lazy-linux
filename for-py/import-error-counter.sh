@@ -6,7 +6,7 @@
 # Same can be achieved by doing a epydoc .
 #
 TMP=$(mktemp -d -p $PWD)
-find -type f -name "*.py" -print0 | xargs -0 grep -w import | cut -d ':' -f2 > ${TMP}/myimports
+find -type f -name "*.py" -print0 | xargs -0 grep -w import | sed s'/,/\n import /'g | cut -d ':' -f2 > ${TMP}/myimports
 cd ${TMP}
 cat myimports  | grep ^import | cut -d ' ' -f2 | cut -d '.' -f1  |  sort -u > impor1
 
