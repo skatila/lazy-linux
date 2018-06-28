@@ -1,12 +1,12 @@
 # If not running interactively, don't do anything
-echo "SOURCING BASHRC"
-export UNCRUSTIFY_CONFIG="/usr/share/doc/uncrustify/documentation/htdocs/linux.cfg.txt"
-STIME=$(date +%H-%M-%S)
-#echo $PATH | tr ':' '\n' | sort  | cat -n > /tmp/${STIME}-start-h-bashrc
 case $- in
     *i*) ;;
       *) return;;
 esac
+echo "SOURCING BASHRC"
+export UNCRUSTIFY_CONFIG="/usr/share/doc/uncrustify/documentation/htdocs/linux.cfg.txt"
+STIME=$(date +%H-%M-%S)
+#echo $PATH | tr ':' '\n' | sort  | cat -n > /tmp/${STIME}-start-h-bashrc
 
 # Fedora sucks when sourcing stuff to .profile
 . /etc/bashrc
