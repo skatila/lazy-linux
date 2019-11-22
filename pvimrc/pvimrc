@@ -78,6 +78,9 @@ if has("persistent_undo")
     set undodir=~/.pvim/undodir/
     set undofile
 endif
+
+Plugin 'google/yapf', { 'rtp': 'plugins/vim' }
+
 call vundle#end()
 
 filetype plugin indent on 
